@@ -22,7 +22,7 @@ import yurl
 
 
 SCHEMES = {
-    's3': 'aldryn_django.storage.S3MediaStorage',
+    's3': 'django_addon.storage.S3MediaStorage',
     'djfs': 'fs.django_storage.DjeeseFSStorage',
 }
 

@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 from django.conf import settings
 
-if settings.ALDRYN_DJANGO_ENABLE_GIS:
+if settings.DJANGO_ADDON_ENABLE_GIS:
     from django.contrib.gis import admin
 else:
     from django.contrib import admin

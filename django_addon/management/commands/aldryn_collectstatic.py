@@ -8,7 +8,7 @@ from django.core.management import call_command
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 
-from aldryn_django.storage import GZippedStaticFilesMixin
+from django_addon.storage import GZippedStaticFilesMixin
 
 
 def iterfiles(root):
@@ -32,7 +32,7 @@ class Command(BaseCommand):
         warnings.warn((
             'aldryn_collectstatic is deprecated, please use a staticfiles\n'
             'storage backend supporting file gzipping, such as\n'
-            'aldryn_django.storage.GZippedStaticFilesStorage, and just call\n'
+            'django_addon.storage.GZippedStaticFilesStorage, and just call\n'
             'the collectstatic management command instead.'
         ), DeprecationWarning)
 

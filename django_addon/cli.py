@@ -68,7 +68,7 @@ def main(ctx, verbose):
         )
 
     if verbose:
-        os.environ['ALDRYN_ADDONS_DEBUG'] = 'True'
+        os.environ['DJANGO_ADDONS_DEBUG'] = 'True'
 
     from . import startup
     startup._setup(BASE_DIR)
