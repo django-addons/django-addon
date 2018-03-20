@@ -11,6 +11,7 @@ setup(
     author_email='info@divio.ch',
     url='https://github.com/django-addons/django-addon',
     packages=find_packages(),
+    python_requires='>=3.6',
     install_requires=[
         # 'django-addons',
         'Django==2.0.3',
