@@ -6,13 +6,13 @@ from getenv import env
 
 
 def manage(path):
-    _setup(path=path)
+    _setup()
     utility = django.core.management.ManagementUtility(None)
     utility.execute()
 
 
 def wsgi(path):
-    _setup(path=path)
+    _setup()
     from django.core.wsgi import get_wsgi_application
     from django.conf import settings
     from dj_static import Cling, MediaCling
@@ -26,12 +26,12 @@ def wsgi(path):
 
 
 def setup(path):
-    _setup(path)
+    _setup()
     import django
     django.setup()
 
 
-def _setup(path):
+def _setup():
     os.environ['DJANGO_SETTINGS_MODULE'] = env(
         'DJANGO_SETTINGS_MODULE', 'settings'
     )

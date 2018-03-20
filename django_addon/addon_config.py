@@ -170,7 +170,6 @@ class Config():
         settings['DJANGO_ADDON_ENABLE_GIS'] = formdata['enable_gis']
         if settings['DJANGO_ADDON_ENABLE_GIS']:
             self.gis_settings()
-        return settings
 
     def domain_settings(self):
         env = self.env
