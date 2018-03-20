@@ -1,4 +1,4 @@
-from django.conf.urls import url, include
+from django.urls import path
 from django.conf import settings
 
 if settings.DJANGO_ADDON_ENABLE_GIS:
@@ -10,5 +10,5 @@ else:
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    path('admin/', admin.site.urls),
 ]
