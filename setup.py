@@ -13,7 +13,7 @@ setup(
     packages=find_packages(),
     python_requires='>=3.6',
     install_requires=[
-        # 'django-addons',
+        'django-addons>=2',
         'Django==2.0.3',
 
         # setup utils
