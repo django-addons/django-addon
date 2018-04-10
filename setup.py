@@ -50,4 +50,9 @@ setup(
     ''',
     include_package_data=True,
     zip_safe=False,
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Programming Language :: Python :: 3.6',
+        'Framework :: Django :: 2.0',
+    ],
 )
