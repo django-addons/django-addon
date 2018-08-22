@@ -40,8 +40,6 @@ setup(
         'boto>=2.40.0',
 
         # helpers
-        'aldryn-sites>=0.5.6',
-
         'easy-thumbnails>=2.2.1.1',
     ],
     entry_points='''

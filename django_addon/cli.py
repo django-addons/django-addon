@@ -31,15 +31,9 @@ sys.path.insert(0, BASE_DIR)
 @click.pass_obj
 def web(ctx_obj):
     """
-    launch the webserver of choice (uwsgi)
+    Launch our webserver of choice (uswgi)
     """
-    if any(boolean_ish(ctx_obj['settings'][key]) for key in
-           ('ENABLE_NGINX', 'ENABLE_PAGESPEED')):
-        # uwsgi behind nginx. possibly with pagespeed
-        start_with_nginx(ctx_obj['settings'])
-    else:
-        # pure uwsgi
-        execute(start_uwsgi_command(settings=ctx_obj['settings'], port=80))
+    execute(start_uwsgi_command(settings=ctx_obj['settings'], port=80))
 
 
 @click.command()
@@ -176,57 +170,3 @@ def start_uwsgi_command(settings, port=None):
             ])
 
     return cmd
-
-
-def start_procfile_command(procfile_path):
-    return [
-        'forego',
-        'start',
-        '-f',
-        procfile_path
-    ]
-
-
-def start_with_nginx(settings):
-    # TODO: test with pagespeed and static or media on other domain
-    from . import startup
-    path = os.getcwd()
-    startup.setup(path=path)
-    if not all((settings['NGINX_CONF_PATH'], settings['NGINX_PROCFILE_PATH'])):
-        raise click.UsageError(
-            'NGINX_CONF_PATH and NGINX_PROCFILE_PATH must be configured'
-        )
-
-    commands = {
-        'nginx': 'nginx',
-        'django': ' '.join(quote(c) for c in start_uwsgi_command(
-            settings, port=settings['BACKEND_PORT']))
-    }
-
-    procfile = '\n'.join(
-        '{}: {}'.format(name, command)
-        for name, command in commands.items()
-    )
-
-    if (
-        settings.get('PAGESPEED_ADMIN_USER') and
-        settings.get('PAGESPEED_ADMIN_PASSWORD') and
-        settings['PAGESPEED_ADMIN_HTPASSWD_PATH']
-    ):
-        with openfile(settings['PAGESPEED_ADMIN_HTPASSWD_PATH']) as f:
-            f.write('{}:{}{}\n'.format(
-                settings.get('PAGESPEED_ADMIN_USER'),
-                '{PLAIN}',
-                settings.get('PAGESPEED_ADMIN_PASSWORD'),
-            ))
-
-    nginx_template = loader.get_template(
-        'aldryn_django/configuration/nginx.conf')
-    context = Context(dict(settings))
-    nginx_conf = nginx_template.render(context)
-
-    with openfile(settings['NGINX_CONF_PATH']) as f:
-        f.write(nginx_conf)
-    with openfile(settings['NGINX_PROCFILE_PATH']) as f:
-        f.write(procfile)
-    execute(start_procfile_command(settings['NGINX_PROCFILE_PATH']))

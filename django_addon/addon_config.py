@@ -48,7 +48,7 @@ class Config():
         self.env = env = partial(djsenv, settings=settings)
         self.formdata = formdata
         self.settings = settings
-        # BASE_DIR should already be set by aldryn-addons
+        # BASE_DIR is already be set by django-addons
         settings['BASE_DIR'] = env('BASE_DIR', required=True)
         settings['DATA_ROOT'] = env('DATA_ROOT', os.path.join(settings['BASE_DIR'], 'data'))
         settings['SECRET_KEY'] = env('SECRET_KEY', 'this-is-not-very-random')
@@ -175,51 +175,13 @@ class Config():
         env = self.env
         settings = self.settings
         formdata = self.formdata
-        settings['ALLOWED_HOSTS'] = env('ALLOWED_HOSTS', ['localhost', '*'])
-        # will take a full config dict from ALDRYN_SITES_DOMAINS if available,
-        # otherwise fall back to constructing the dict from DOMAIN,
-        # DOMAIN_ALIASES and DOMAIN_REDIRECTS
         domain = env('DOMAIN')
-        if domain:
-            settings['DOMAIN'] = domain
+        allowed_hosts = env('ALLOWED_HOSTS')
+        if not domain:
+            allowed_hosts = ['localhost', '*']
 
-        domains = env('ALDRYN_SITES_DOMAINS', {})
-        if not domains and domain:
-            domain_aliases = [
-                d.strip()
-                for d in env('DOMAIN_ALIASES', '').split(',')
-                if d.strip()
-            ]
-            domain_redirects = [
-                d.strip()
-                for d in env('DOMAIN_REDIRECTS', '').split(',')
-                if d.strip()
-            ]
-            domains = {
-                1: {
-                    'name': env('SITE_NAME', ''),
-                    'domain': domain,
-                    'aliases': domain_aliases,
-                    'redirects': domain_redirects,
-                },
-            }
-        settings['ALDRYN_SITES_DOMAINS'] = domains
-
-        # This is ensured again by aldryn-sites, but we already do it here
-        # as we need the full list of domains later when configuring
-        # media/static serving, before aldryn-sites had a chance to run.
-        site_domains = domains.get(settings['SITE_ID'])
-        if site_domains:
-            settings['ALLOWED_HOSTS'].append(site_domains['domain'])
-            settings['ALLOWED_HOSTS'].extend(site_domains['aliases'])
-            settings['ALLOWED_HOSTS'].extend(site_domains['redirects'])
-
-        settings['INSTALLED_APPS'].append('aldryn_sites')
-
-        settings['MIDDLEWARE'].insert(
-            settings['MIDDLEWARE'].index('django.middleware.common.CommonMiddleware'),
-            'aldryn_sites.middleware.SiteMiddleware',
-        )
+        settings['DOMAIN'] = domain
+        settings['ALLOWED_HOSTS'] = allowed_hosts
 
     def security_settings(self):
         env = self.env
@@ -246,7 +208,7 @@ class Config():
         s['SECURE_BROWSER_XSS_FILTER'] = env('SECURE_BROWSER_XSS_FILTER', False)
 
         s['MIDDLEWARE'].insert(
-            s['MIDDLEWARE'].index('aldryn_sites.middleware.SiteMiddleware') + 1,
+            s['MIDDLEWARE'].index('django.middleware.common.CommonMiddleware') + 1,
             'django.middleware.security.SecurityMiddleware',
         )
 
@@ -255,27 +217,11 @@ class Config():
         settings = self.settings
         settings['PORT'] = env('PORT', 80)
         settings['BACKEND_PORT'] = env('BACKEND_PORT', 8000)
-        settings['ENABLE_NGINX'] = env('ENABLE_NGINX', False)
-        settings['ENABLE_PAGESPEED'] = env(
-            'ENABLE_PAGESPEED',
-            env('PAGESPEED', False),
-        )
         settings['STATICFILES_DEFAULT_MAX_AGE'] = env(
             'STATICFILES_DEFAULT_MAX_AGE',
             # Keep BROWSERCACHE_MAX_AGE for backwards compatibility
             env('BROWSERCACHE_MAX_AGE', 300),
         )
-        settings['NGINX_CONF_PATH'] = env('NGINX_CONF_PATH')
-        settings['NGINX_PROCFILE_PATH'] = env('NGINX_PROCFILE_PATH')
-        settings['PAGESPEED_ADMIN_HTPASSWD_PATH'] = env(
-            'PAGESPEED_ADMIN_HTPASSWD_PATH',
-            os.path.join(
-                os.path.dirname(settings['NGINX_CONF_PATH']),
-                'pagespeed_admin.htpasswd',
-            )
-        )
-        settings['PAGESPEED_ADMIN_USER'] = env('PAGESPEED_ADMIN_USER')
-        settings['PAGESPEED_ADMIN_PASSWORD'] = env('PAGESPEED_ADMIN_PASSWORD')
         settings['DJANGO_WEB_WORKERS'] = env('DJANGO_WEB_WORKERS', 3)
         settings['DJANGO_WEB_MAX_REQUESTS'] = env('DJANGO_WEB_MAX_REQUESTS', 500)
         settings['DJANGO_WEB_TIMEOUT'] = env('DJANGO_WEB_TIMEOUT', 120)
@@ -321,10 +267,6 @@ class Config():
                     'handlers': ['console'],
                     'level': 'INFO',
                     'propagate': False,
-                },
-                'aldryn': {
-                    'handlers': ['console'],
-                    'level': 'INFO',
                 },
                 'py.warnings': {
                     'handlers': ['console'],
@@ -498,7 +440,6 @@ class Config():
             settings['TIME_ZONE'] = env('TIME_ZONE')
 
     def migration_settings(self):
-        from . import storage
         env = self.env
         settings = self.settings
 
@@ -507,10 +448,6 @@ class Config():
 
         mcmds.append('CACHE_URL="locmem://" python manage.py createcachetable django_dbcache; exit 0')
         mcmds.append('python manage.py migrate --noinput')
-
-        if not boolean_ish(env('DISABLE_S3_MEDIA_HEADERS_UPDATE')):
-            if settings['DEFAULT_FILE_STORAGE'] == storage.SCHEMES['s3']:
-                mcmds.append('python manage.py aldryn_update_s3_media_headers')
 
     def gis_settings(self):
         settings = self.settings
