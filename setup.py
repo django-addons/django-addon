@@ -14,7 +14,7 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         'django-addons>=2',
-        'Django==2.0.8',
+        'Django==2.2.13',
 
         # setup utils
         'dj-database-url',
